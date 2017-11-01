@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         media.setName(name);
         media.setFile(path);
         media.setPhotoOrVideo((ext.contentEquals(".jpg")) ? REQUEST_IMAGE_CAPTURE : REQUEST_VIDEO_CAPTURE);
-        updateLocation();
+        //updateLocation();
         media.setLatitude(location.getLatitude());
         media.setLongitude(location.getLongitude());
     }
@@ -188,9 +188,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void updateLocation() {
         try {
-            location = gestorLoc.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            //location = gestorLoc.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         } catch (SecurityException e) {
-            //
+            Toast.makeText(this, "El GPS aún no ha conectado, espere", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -203,9 +203,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         && grantResults[2] == PackageManager.PERMISSION_GRANTED
                         && grantResults[3] == PackageManager.PERMISSION_GRANTED) {
                     // We have permissions activate GPS
-                    loadDB();
+                    //
                     try {
+                        loadDB();
                         gestorLoc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
+                        gestorLoc.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this);
                     } catch (SecurityException e) {
                         //
                     }
@@ -251,7 +253,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onLocationChanged(Location location) {
+        if(this.location == null){
+            photoFab.setEnabled(true);
+            videoFab.setEnabled(true);
+            photoFab.setAlpha(1f);
+            videoFab.setAlpha(1f);
+        }
         this.location = location;
+        Toast.makeText(getApplicationContext(),
+                "Location latitude: " + location.getLatitude() +
+                " Longitude: " + location.getLongitude(),
+                Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -274,22 +286,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onProviderEnabled(String s) {
         Toast.makeText(getApplicationContext(),
-                "GPS habilitat per l'usuari",
+                "GPS ON, waiting...",
                 Toast.LENGTH_LONG).show();
-        photoFab.setEnabled(true);
-        videoFab.setEnabled(true);
-        photoFab.setAlpha(1f);
-        videoFab.setAlpha(1f);
     }
 
     @Override
     public void onProviderDisabled(String s) {
         Toast.makeText(getApplicationContext(),
-                "GPS desactivat per l'usuari",
+                "GPS OFF",
                 Toast.LENGTH_LONG).show();
         photoFab.setEnabled(false);
         videoFab.setEnabled(false);
         photoFab.setAlpha(0.5f);
         videoFab.setAlpha(0.5f);
+        location = null;
     }
 }
