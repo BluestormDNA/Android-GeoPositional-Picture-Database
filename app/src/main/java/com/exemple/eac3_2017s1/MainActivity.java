@@ -4,24 +4,19 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,11 +25,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -186,14 +180,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void updateLocation() {
-        try {
-            //location = gestorLoc.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } catch (SecurityException e) {
-            Toast.makeText(this, "El GPS aún no ha conectado, espere", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -253,17 +239,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onLocationChanged(Location location) {
-        if(this.location == null){
+        if (this.location == null) {
             photoFab.setEnabled(true);
             videoFab.setEnabled(true);
             photoFab.setAlpha(1f);
             videoFab.setAlpha(1f);
+            showSnack("Location Available", Color.GREEN);
         }
         this.location = location;
-        Toast.makeText(getApplicationContext(),
-                "Location latitude: " + location.getLatitude() +
-                " Longitude: " + location.getLongitude(),
-                Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -285,20 +268,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onProviderEnabled(String s) {
-        Toast.makeText(getApplicationContext(),
-                "GPS ON, waiting...",
-                Toast.LENGTH_LONG).show();
+        showSnack("GPS ON - Awaiting data...", Color.YELLOW);
     }
 
     @Override
     public void onProviderDisabled(String s) {
-        Toast.makeText(getApplicationContext(),
-                "GPS OFF",
-                Toast.LENGTH_LONG).show();
         photoFab.setEnabled(false);
         videoFab.setEnabled(false);
         photoFab.setAlpha(0.5f);
         videoFab.setAlpha(0.5f);
         location = null;
+        showSnack("GPS OFF", Color.RED);
+    }
+
+    public void showSnack(String msg, int color){
+        Snackbar snack = Snackbar.make(recyclerView, msg, Snackbar.LENGTH_SHORT);
+        View view = snack.getView();
+        TextView tv = view.findViewById(android.support.design.R.id.snackbar_text);
+        tv.setTextColor(color);
+        snack.show();
     }
 }
