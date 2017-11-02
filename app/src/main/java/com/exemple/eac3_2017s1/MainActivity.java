@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,10 +86,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
+        disableDeathOnFileUriExposure();
+    }
 
-        //loadDB();
+    private void disableDeathOnFileUriExposure() {
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
+                m.invoke(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadDB() {
@@ -162,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         media.setName(name);
         media.setFile(path);
         media.setPhotoOrVideo((ext.contentEquals(".jpg")) ? REQUEST_IMAGE_CAPTURE : REQUEST_VIDEO_CAPTURE);
-        //updateLocation();
         media.setLatitude(location.getLatitude());
         media.setLongitude(location.getLongitude());
     }
@@ -177,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             db.close();
             adaptador.setList(lista);
             adaptador.notifyDataSetChanged();
+        } else {
+            File file = new File(media.getFile() + File.separator + media.getName());
+            file.delete();
         }
     }
 
@@ -281,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showSnack("GPS OFF", Color.RED);
     }
 
-    public void showSnack(String msg, int color){
+    public void showSnack(String msg, int color) {
         Snackbar snack = Snackbar.make(recyclerView, msg, Snackbar.LENGTH_SHORT);
         View view = snack.getView();
         TextView tv = view.findViewById(android.support.design.R.id.snackbar_text);
