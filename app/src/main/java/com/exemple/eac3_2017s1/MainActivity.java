@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         disableDeathOnFileUriExposure();
+        disableFabs();
     }
 
     private void disableDeathOnFileUriExposure() {
@@ -252,13 +253,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onLocationChanged(Location location) {
         if (this.location == null) {
-            photoFab.setEnabled(true);
-            videoFab.setEnabled(true);
-            photoFab.setAlpha(1f);
-            videoFab.setAlpha(1f);
+            enableFabs();
             showSnack("Location Available", Color.GREEN);
         }
         this.location = location;
+    }
+
+    private void enableFabs() {
+        photoFab.setEnabled(true);
+        videoFab.setEnabled(true);
+        photoFab.setAlpha(1f);
+        videoFab.setAlpha(1f);
     }
 
     @Override
@@ -285,12 +290,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onProviderDisabled(String s) {
+        disableFabs();
+        location = null;
+        showSnack("GPS OFF", Color.RED);
+    }
+
+    private void disableFabs() {
         photoFab.setEnabled(false);
         videoFab.setEnabled(false);
         photoFab.setAlpha(0.5f);
         videoFab.setAlpha(0.5f);
-        location = null;
-        showSnack("GPS OFF", Color.RED);
     }
 
     public void showSnack(String msg, int color) {

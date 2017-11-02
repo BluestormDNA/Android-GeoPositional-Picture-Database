@@ -1,6 +1,7 @@
 package com.exemple.eac3_2017s1;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -84,10 +85,10 @@ import java.util.List;
 
         @Override
         public void onClick(View v) {
-            //Intent intent = new Intent(context, clase);
-            //intent.putExtra("item", lista.get(getAdapterPosition()));
+            Intent intent = new Intent(context, VisorGPS.class);
+            intent.putExtra("media", lista.get(getAdapterPosition()));
 
-            //context.startActivity(intent);
+            context.startActivity(intent);
         }
 
         @Override

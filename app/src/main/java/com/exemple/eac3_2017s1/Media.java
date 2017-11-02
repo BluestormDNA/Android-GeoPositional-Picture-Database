@@ -1,10 +1,12 @@
 package com.exemple.eac3_2017s1;
 
+import java.io.Serializable;
+
 /**
  * Created by BlueStorm on 28/10/2017.
  */
 
-public class Media {
+public class Media implements Serializable{
     private int id;
     private String name;
     private String file;
