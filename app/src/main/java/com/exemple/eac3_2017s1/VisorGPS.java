@@ -1,10 +1,14 @@
 package com.exemple.eac3_2017s1;
 
 
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,8 +36,23 @@ public class VisorGPS extends AppCompatActivity implements OnMapReadyCallback{
         map.getMapAsync(this);
 
         media = (Media) getIntent().getSerializableExtra("media");
-        ImageView imageView = findViewById(R.id.visor);
-        imageView.setImageDrawable(Drawable.createFromPath(media.getFile()+ File.separator+media.getName()));
+        String path = media.getFile() + File.separator + media.getName();
+        ImageView imageView = findViewById(R.id.imageView);
+        VideoView videoView = findViewById(R.id.videoView);
+
+        MediaController mediaController = new MediaController(this);
+        mediaController.setAnchorView(videoView);
+        videoView.setMediaController(mediaController);
+
+
+        if(media.getPhotoOrVideo() == 0) {
+            imageView.setVisibility(View.VISIBLE);
+            imageView.setImageDrawable(Drawable.createFromPath(path));
+        } else {
+            videoView.setVisibility(View.VISIBLE);
+            videoView.setVideoPath(path);
+            videoView.start();
+        }
 
     }
 
