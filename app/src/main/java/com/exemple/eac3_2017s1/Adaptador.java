@@ -19,6 +19,7 @@ import java.util.List;
     public class Adaptador extends RecyclerView.Adapter<Adaptador.ElMeuViewHolder> {
     private List<Media> lista;
     private Context context;
+    private DBInterface db;
 
     //Creem el constructor
     public Adaptador(Context context) {
@@ -66,6 +67,10 @@ import java.util.List;
 
     public List<Media> getList() {
         return lista;
+    }
+
+    public void setDB(DBInterface db) {
+        this.db = db;
     }
 
     //Definim el nostre ViewHolder, és a dir, un element de la llista en qüestió

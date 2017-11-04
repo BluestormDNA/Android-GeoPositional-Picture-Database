@@ -75,19 +75,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView.setAdapter(adaptador);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        db = new DBInterface(this);
+        adaptador.setDB(db);
         lista = new ArrayList<>();
 
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getSerializable("media") != null)
+                media = (Media) savedInstanceState.getSerializable("media");
+            if (savedInstanceState.getParcelable("location") != null)
+                location = savedInstanceState.getParcelable("location");
+        }
+
+        askPermissions();
+
+        disableDeathOnFileUriExposure();
+        disableFabs();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (media != null) outState.putSerializable("media", media);
+        if (location != null) outState.putParcelable("location", location);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void askPermissions() {
         ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.CAMERA,
                         Manifest.permission.ACCESS_FINE_LOCATION},
                 PERMISSION);
-
-        gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        disableDeathOnFileUriExposure();
-        disableFabs();
     }
 
     private void disableDeathOnFileUriExposure() {
@@ -102,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadDB() {
-        db = new DBInterface(this);
         db.open();
         lista.addAll(db.getAll());
         db.close();
@@ -201,12 +218,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED
                         && grantResults[2] == PackageManager.PERMISSION_GRANTED
                         && grantResults[3] == PackageManager.PERMISSION_GRANTED) {
-                    // We have permissions activate GPS
-                    //
+                    // We have permissions: do all the things!!!
                     try {
+                        // Go go database
                         loadDB();
+                        // location Manager loading and updates from gps and network
+                        gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                         gestorLoc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
                         gestorLoc.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this);
+                        // just to be sure that we have something fast and accurate
+                        // if not we will wait for location onLocationChange callback anyway
+                        // location = gestorLoc.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        //if (location == null){location = gestorLoc.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);}
                     } catch (SecurityException e) {
                         //
                     }
@@ -245,8 +268,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Save a file: path for use with ACTION_VIEW intents
-        //String mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
@@ -290,16 +311,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onProviderDisabled(String s) {
-        disableFabs();
         location = null;
+        disableFabs();
         showSnack("GPS OFF", Color.RED);
     }
 
     private void disableFabs() {
-        photoFab.setEnabled(false);
-        videoFab.setEnabled(false);
-        photoFab.setAlpha(0.5f);
-        videoFab.setAlpha(0.5f);
+        if (location == null) {
+            photoFab.setEnabled(false);
+            videoFab.setEnabled(false);
+            photoFab.setAlpha(0.5f);
+            videoFab.setAlpha(0.5f);
+        }
     }
 
     public void showSnack(String msg, int color) {
