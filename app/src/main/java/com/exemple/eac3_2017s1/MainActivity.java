@@ -23,9 +23,9 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,14 +37,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static android.location.LocationProvider.*;
+import static android.location.LocationProvider.AVAILABLE;
+import static android.location.LocationProvider.OUT_OF_SERVICE;
+import static android.location.LocationProvider.TEMPORARILY_UNAVAILABLE;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener {
 
     private final int REQUEST_IMAGE_CAPTURE = 0;
     private final int REQUEST_VIDEO_CAPTURE = 1;
     private final int PERMISSION = 1;
-
+    //
+    FloatingActionButton photoFab;
+    FloatingActionButton videoFab;
     private DBInterface db;
     private LocationManager gestorLoc;
     private Location location;
@@ -53,15 +57,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //
     private List<Media> lista;
     private Media media;
-    //
-    FloatingActionButton photoFab;
-    FloatingActionButton videoFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         photoFab = findViewById(R.id.fabPhoto);
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         videoFab.setOnClickListener(this);
 
         adaptador = new Adaptador(this);
-        recyclerView = (RecyclerView) findViewById(R.id.rView);
+        recyclerView = findViewById(R.id.rView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adaptador);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -198,9 +199,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_VIDEO_CAPTURE)
                 && resultCode == RESULT_OK) {
-            lista.add(media);
             db.open();
             db.insert(media);
+            lista = db.getAll();
             db.close();
             adaptador.setList(lista);
             adaptador.notifyDataSetChanged();
@@ -244,10 +245,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String prefix = null;
         String sufix = null;
 
-        if (type == "JPG") {
+        if (type.equals("JPG")) {
             prefix = "JPEG_";
             sufix = ".jpg";
-        } else if (type == "MP4") {
+        } else if (type.equals("MP4")) {
             prefix = "MP4_";
             sufix = ".mp4";
         }
@@ -301,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 missatge = "GPS status: Available";
                 break;
         }
-        Toast.makeText(this, missatge, Toast.LENGTH_SHORT);
+        Toast.makeText(this, missatge, Toast.LENGTH_SHORT).show();
     }
 
     @Override

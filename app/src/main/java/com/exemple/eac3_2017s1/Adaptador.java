@@ -2,7 +2,6 @@ package com.exemple.eac3_2017s1;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.List;
 
 /**
  * Created by BlueStorm on 28/10/2017.
  */
 
-    public class Adaptador extends RecyclerView.Adapter<Adaptador.ElMeuViewHolder> {
+public class Adaptador extends RecyclerView.Adapter<Adaptador.ElMeuViewHolder> {
     private List<Media> lista;
     private Context context;
     private DBInterface db;
@@ -53,7 +53,7 @@ import java.util.List;
          * */
         //Drawable icon = Drawable.createFromPath()
         int photoOrVideo = lista.get(position).getPhotoOrVideo();
-        if (photoOrVideo == 1){
+        if (photoOrVideo == 1) {
             viewHolder.imageView.setImageResource(R.drawable.ic_play_circle_outline_white_24dp);
         } else {
             viewHolder.imageView.setImageResource(R.drawable.ic_photo_white_24dp);
@@ -65,12 +65,13 @@ import java.util.List;
         this.lista = lista;
     }
 
-    public List<Media> getList() {
-        return lista;
-    }
-
     public void setDB(DBInterface db) {
         this.db = db;
+    }
+
+    private void removeFile(int posicion) {
+        File file = new File(lista.get(posicion).getFile() + File.separator + lista.get(posicion).getName());
+        file.delete();
     }
 
     //Definim el nostre ViewHolder, és a dir, un element de la llista en qüestió
@@ -81,8 +82,8 @@ import java.util.List;
         public ElMeuViewHolder(View v) {
             super(v);
             //referenciem widgets al layout
-            imageView = (ImageView) v.findViewById(R.id.imageView);
-            vTitle = (TextView) v.findViewById(R.id.title);
+            imageView = v.findViewById(R.id.imageView);
+            vTitle = v.findViewById(R.id.title);
             //Establecemos listner
             v.setOnClickListener(this);
             v.setOnLongClickListener(this);
@@ -99,6 +100,10 @@ import java.util.List;
         @Override
         public boolean onLongClick(View v) {
             int posicion = getAdapterPosition();
+            db.open();
+            db.delete(lista.get(posicion).getId());
+            db.close();
+            removeFile(posicion);
             lista.remove(posicion);
             notifyItemRemoved(posicion);
             return true;
@@ -106,3 +111,4 @@ import java.util.List;
 
     }
 }
+

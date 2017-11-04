@@ -16,20 +16,20 @@ import java.util.List;
  */
 
 public class DBInterface {
-    public static final String _ID = "_id";
-    public static final String NAME = "name";
-    public static final String FILE = "file";
-    public static final String PHOTO_OR_VIDEO = "photo_or_video";
-    public static final String LATITUDE = "latitude";
-    public static final String LONGITUDE = "longitude";
+    private static final String _ID = "_id";
+    private static final String NAME = "name";
+    private static final String FILE = "file";
+    private static final String PHOTO_OR_VIDEO = "photo_or_video";
+    private static final String LATITUDE = "latitude";
+    private static final String LONGITUDE = "longitude";
 
-    public static final String DB_NAME = "mediadb";
-    public static final String TABLE_NAME = "media";
+    private static final String DB_NAME = "mediadb";
+    private static final String TABLE_NAME = "media";
 
-    public static final String TAG = "DBInterface";
-    public static final int VERSIO = 1;
+    private static final String TAG = "DBInterface";
+    private static final int VERSIO = 1;
 
-    public static final String DB_CREATE =
+    private static final String DB_CREATE =
             "create table " + TABLE_NAME + "( " + _ID + " integer primary key autoincrement, " +
                     NAME + ", " + FILE + ", " + PHOTO_OR_VIDEO + ", " + LATITUDE + ", " + LONGITUDE + ");";
 
@@ -89,6 +89,10 @@ public class DBInterface {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         db.execSQL(DB_CREATE);
         close();
+    }
+
+    public void delete(int id) {
+        db.delete(TABLE_NAME, _ID + " = ?", new String[]{String.valueOf(id)});
     }
 
     private static class DBHelper extends SQLiteOpenHelper {
