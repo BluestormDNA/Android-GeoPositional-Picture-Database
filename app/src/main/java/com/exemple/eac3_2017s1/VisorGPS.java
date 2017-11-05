@@ -1,7 +1,6 @@
 package com.exemple.eac3_2017s1;
 
 
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,17 +33,18 @@ public class VisorGPS extends AppCompatActivity implements OnMapReadyCallback{
 
         MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         map.getMapAsync(this);
-
+        // recuperamos el objeto media pasado al intent
         media = (Media) getIntent().getSerializableExtra("media");
+        // generamos el path con los datos del objeto media
         String path = media.getFile() + File.separator + media.getName();
         ImageView imageView = findViewById(R.id.imageView);
         VideoView videoView = findViewById(R.id.videoView);
-
+        // iniciamos controles para video
         MediaController mediaController = new MediaController(this);
         mediaController.setAnchorView(videoView);
         videoView.setMediaController(mediaController);
 
-
+        // Comprobamos si es foto o video y le pasamos el path
         if(media.getPhotoOrVideo() == 0) {
             imageView.setVisibility(View.VISIBLE);
             imageView.setImageDrawable(Drawable.createFromPath(path));

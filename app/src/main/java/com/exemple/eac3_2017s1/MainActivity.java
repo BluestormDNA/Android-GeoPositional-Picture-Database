@@ -27,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,20 +75,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView.setAdapter(adaptador);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        //iniciamos db y la pasamos al adaptador
         db = new DBInterface(this);
         adaptador.setDB(db);
+        //iniciamos lista local
         lista = new ArrayList<>();
 
+        //comprobamos si no hay datos guardados y si los hay los cargamos
         if (savedInstanceState != null) {
             if (savedInstanceState.getSerializable("media") != null)
                 media = (Media) savedInstanceState.getSerializable("media");
             if (savedInstanceState.getParcelable("location") != null)
                 location = savedInstanceState.getParcelable("location");
         }
-
+        //pedimos permisos
         askPermissions();
-
+        //desactivamos el control de content para target sdk 28 ejecutando en +24
         disableDeathOnFileUriExposure();
+        // desactivamos fabs
         disableFabs();
     }
 
@@ -162,6 +165,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Gestionamos video creando un file mp4, generando un objeto media y psandole file
+     * al intent para grabar video
+     */
     private void handleVideo() {
         File file = createFile("MP4");
         createMedia(file);
@@ -172,6 +179,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Gestionamos imagen creando un file jpg, generando un objeto media y pasandole
+     * file al intent para tomar imagen
+     */
     private void handlePhoto() {
         File file = createFile("JPG");
         createMedia(file);
@@ -182,6 +193,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Genera un objeto media en base a los datos del file generado y la localizacion actual
+     *
+     * @param file
+     */
     private void createMedia(File file) {
         String fileString = file.toString();
         String name = fileString.substring(fileString.lastIndexOf('/') + 1, fileString.length());
@@ -199,13 +215,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_VIDEO_CAPTURE)
                 && resultCode == RESULT_OK) {
+            // Introducimos el archivo media actual en la base de datos
             db.open();
             db.insert(media);
+            // volvemos a refrescar toda la lista de la base de datos asi nos aseguramos que todos
+            // los objetos media tienen id para posteriormente poder gestionar el borrado
             lista = db.getAll();
             db.close();
+            // pasamos la nueva lista al adaptador y notificamos
             adaptador.setList(lista);
             adaptador.notifyDataSetChanged();
         } else {
+            // si el intent no ha sido un exito quiere decir que el usuario ha cancelado y debemos
+            // borrar el file que le pasamos al intent ya que se habra escrito sin datos
             File file = new File(media.getFile() + File.separator + media.getName());
             file.delete();
         }
@@ -226,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         // location Manager loading and updates from gps and network
                         gestorLoc = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                         gestorLoc.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
-                        gestorLoc.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this);
+                        //gestorLoc.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this);
                         // just to be sure that we have something fast and accurate
                         // if not we will wait for location onLocationChange callback anyway
                         // location = gestorLoc.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -281,6 +303,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.location = location;
     }
 
+    /**
+     * Activamos fabs
+     */
     private void enableFabs() {
         photoFab.setEnabled(true);
         videoFab.setEnabled(true);
@@ -302,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 missatge = "GPS status: Available";
                 break;
         }
-        Toast.makeText(this, missatge, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, missatge, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -317,6 +342,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showSnack("GPS OFF", Color.RED);
     }
 
+    /**
+     * Desactivamos fabs siempre y cuando no haya ubicacion
+     */
     private void disableFabs() {
         if (location == null) {
             photoFab.setEnabled(false);
@@ -326,6 +354,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Generamos un Snackbar que sabe mejor que una Tostada
+     * @param msg Texto del mensaje a mostrar
+     * @param color Color."color" doh!
+     */
     public void showSnack(String msg, int color) {
         Snackbar snack = Snackbar.make(recyclerView, msg, Snackbar.LENGTH_SHORT);
         View view = snack.getView();

@@ -61,10 +61,19 @@ public class Adaptador extends RecyclerView.Adapter<Adaptador.ElMeuViewHolder> {
         viewHolder.vTitle.setText(lista.get(position).getName());
     }
 
+    /**
+     * Establece la lista
+     *
+     * @param lista
+     */
     public void setList(List lista) {
         this.lista = lista;
     }
 
+    /**
+     * Establece la base de datos
+     * @param db
+     */
     public void setDB(DBInterface db) {
         this.db = db;
     }
@@ -91,20 +100,27 @@ public class Adaptador extends RecyclerView.Adapter<Adaptador.ElMeuViewHolder> {
 
         @Override
         public void onClick(View v) {
+            //Generamos nuevo intent con la clase VisorGPS
             Intent intent = new Intent(context, VisorGPS.class);
+            //Le adjuntamos el objeto media escogido al intent
             intent.putExtra("media", lista.get(getAdapterPosition()));
-
+            //Go go power intent
             context.startActivity(intent);
         }
 
         @Override
         public boolean onLongClick(View v) {
+            // Recuperamos posicion
             int posicion = getAdapterPosition();
+            // Gestionamos borrado de DB
             db.open();
             db.delete(lista.get(posicion).getId());
             db.close();
+            // Gestionamos borrado del archivo guardado
             removeFile(posicion);
+            // Gestionamos borrado del objeto media en lista
             lista.remove(posicion);
+            // notificamos que la lista ha cambiado
             notifyItemRemoved(posicion);
             return true;
         }

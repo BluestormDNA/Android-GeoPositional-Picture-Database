@@ -43,14 +43,12 @@ public class DBInterface {
     }
 
     //Obre la BD
-
     public DBInterface open() throws SQLException {
         db = dbHelper.getWritableDatabase();
         return this;
     }
 
-//Tanca la BD
-
+    //Tanca la BD
     public void close() {
         dbHelper.close();
     }
@@ -67,6 +65,11 @@ public class DBInterface {
         return db.insert(TABLE_NAME, null, initialValues);
     }
 
+    /**
+     * Recupera todos los objetos media en List de la tabla
+     *
+     * @return List
+     */
     public List<Media> getAll() {
         List<Media> list = new ArrayList<>();
         Cursor cursor = db.query(TABLE_NAME, new String[]{_ID, NAME, FILE, PHOTO_OR_VIDEO, LATITUDE, LONGITUDE}, null, null, null, null, null);
@@ -91,6 +94,10 @@ public class DBInterface {
         close();
     }
 
+    /**
+     * Elimina de la tabla el id pasado como parametro
+     * @param id
+     */
     public void delete(int id) {
         db.delete(TABLE_NAME, _ID + " = ?", new String[]{String.valueOf(id)});
     }
