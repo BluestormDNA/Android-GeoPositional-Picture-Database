@@ -1,7 +1,7 @@
 # Android-GeoPositional-Picture-Database
 Android GeoPositional picture database and map (google maps) viewer
 
-An App to populate thath checks for Android 6.0+ permissions and let you populate a RecylerView using the camera.
+An App thath checks for Android 6.0+ permissions and let you populate a RecylerView using the camera.
 It saves videos, pictures to the gallery and locations to a SQLite database.
 I can be used as a gallery with added google maps location of the picture/video.
 
